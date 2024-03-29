@@ -16,7 +16,7 @@ Simplifies handling of update operations when working with PostgreSQL databases.
 2. Enable Query Locks
 
 Inside the AddDbContext or AddDbContextPool method, after calling UseNpgsql(), call the UseQueryLocks() method on the DbContextOptionsBuilder to enable query locks.
-```
+```csharp
 services.AddDbContext<MyDbContext>(options =>
 {
     options.UseNpgsql(Configuration.GetConnectionString("MyDatabaseConnection"))
@@ -26,7 +26,7 @@ services.AddDbContext<MyDbContext>(options =>
 
 ## Usage
 Use the provided ForUpdate extension method on IQueryable within your application to apply PostgreSQL-specific update syntax.
-```
+```csharp
 using Pandatech.EFCore.PostgresExtensions;
 using Microsoft.EntityFrameworkCore;
 
