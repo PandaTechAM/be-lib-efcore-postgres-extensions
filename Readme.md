@@ -11,22 +11,22 @@ Simplifies handling of update operations when working with PostgreSQL databases.
 
 ## Installation
 1. Install Pandatech.EFCore.PostgresExtensions Package
-Command: Install-Package Pandatech.EFCore.PostgresExtensions
+```Install-Package Pandatech.EFCore.PostgresExtensions```
  
 2. Enable Query Locks
 
 Inside the AddDbContext or AddDbContextPool method, after calling UseNpgsql(), call the UseQueryLocks() method on the DbContextOptionsBuilder to enable query locks.
-
+```
 services.AddDbContext<MyDbContext>(options =>
 {
     options.UseNpgsql(Configuration.GetConnectionString("MyDatabaseConnection"))
            .UseQueryLocks();
 });
-
+```
 
 ## Usage
 Use the provided ForUpdate extension method on IQueryable within your application to apply PostgreSQL-specific update syntax.
-
+```
 using Pandatech.EFCore.PostgresExtensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,7 +53,7 @@ using (var transaction = _dbContext.Database.BeginTransaction())
         // Handle exception
     }
 }
-
+```
 ## License
 
 Pandatech.EFCore.PostgresExtensions is licensed under the MIT License.
