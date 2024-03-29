@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandaNuGet", "src\PandaNuGet\PandaNuGet.csproj", "{25001943-A870-4E17-A9B9-0D190CEC819B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandaNuGet.Tests", "test\PandaNuGet.Tests\PandaNuGet.Tests.csproj", "{0305E58F-1C47-454C-B10B-A223F2561A85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandaNuGet.Demo", "test\PandaNuGet.Demo\PandaNuGet.Demo.csproj", "{8A6AA36D-1CEF-4018-9C9D-7D029F3EAECE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F8A6DCFE-8924-49A4-B3E9-2034593F54E5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{FEE159A2-74A0-4469-9B93-52987CA1A3CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8FF54200-8B03-4828-AAAE-297E30E2A00A}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\main.yml = .github\workflows\main.yml
+		.gitignore = .gitignore
+		Readme.md = Readme.md
+		global.json = global.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25001943-A870-4E17-A9B9-0D190CEC819B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25001943-A870-4E17-A9B9-0D190CEC819B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25001943-A870-4E17-A9B9-0D190CEC819B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25001943-A870-4E17-A9B9-0D190CEC819B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0305E58F-1C47-454C-B10B-A223F2561A85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0305E58F-1C47-454C-B10B-A223F2561A85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0305E58F-1C47-454C-B10B-A223F2561A85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0305E58F-1C47-454C-B10B-A223F2561A85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A6AA36D-1CEF-4018-9C9D-7D029F3EAECE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A6AA36D-1CEF-4018-9C9D-7D029F3EAECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A6AA36D-1CEF-4018-9C9D-7D029F3EAECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A6AA36D-1CEF-4018-9C9D-7D029F3EAECE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{25001943-A870-4E17-A9B9-0D190CEC819B} = {F8A6DCFE-8924-49A4-B3E9-2034593F54E5}
+		{8A6AA36D-1CEF-4018-9C9D-7D029F3EAECE} = {FEE159A2-74A0-4469-9B93-52987CA1A3CA}
+		{0305E58F-1C47-454C-B10B-A223F2561A85} = {FEE159A2-74A0-4469-9B93-52987CA1A3CA}
+	EndGlobalSection
+EndGlobal
