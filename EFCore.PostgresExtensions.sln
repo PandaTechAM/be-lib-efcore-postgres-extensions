@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandaNuGet", "src\PandaNuGet\PandaNuGet.csproj", "{25001943-A870-4E17-A9B9-0D190CEC819B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCore.PostgresExtensions", "src\EFCore.PostgresExtensions\EFCore.PostgresExtensions.csproj", "{25001943-A870-4E17-A9B9-0D190CEC819B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandaNuGet.Tests", "test\PandaNuGet.Tests\PandaNuGet.Tests.csproj", "{0305E58F-1C47-454C-B10B-A223F2561A85}"
 EndProject

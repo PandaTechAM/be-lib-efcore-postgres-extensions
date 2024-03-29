@@ -1,7 +1,7 @@
 name: Deploy NuGet Package
 
 env:
-  PROJECT_PATH: './src/PandaNuGet/PandaNuGet.csproj'
+  PROJECT_PATH: './src/EFCore.PostgresExtensions/EFCore.PostgresExtensions.csproj'
   OUTPUT_DIR: 'nupkgs'
   NUGET_SOURCE: 'https://api.nuget.org/v3/index.json'
   NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
