@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using Dapper;
+using EFCore.BulkExtensions;
 using EFCore.PostgresExtensions.Extensions.BulkInsertExtension;
 using Microsoft.EntityFrameworkCore;
 using PandaNuGet.Demo.Context;
@@ -206,6 +207,42 @@ public class BulkInsertService(PostgresContext dbContext)
 
         stopwatch.Stop();
         return new BulkBenchmarkResponse(BenchmarkMethod.Dapper, rowsCount, stopwatch.ElapsedMilliseconds.ToString());
+    }
+
+    public async Task<BulkBenchmarkResponse> BulkInsertExternalAsync(int rowsCount, bool ignoreReset = false)
+    {
+        await ResetDbAsync(ignoreReset);
+        var users = new List<UserEntity>();
+
+        for (int i = 0; i < rowsCount; i++)
+        {
+            users.Add(new UserEntity());
+        }
+
+        var stopwatch = Stopwatch.StartNew();
+        await dbContext.BulkInsertAsync(users);
+        stopwatch.Stop();
+
+        return new BulkBenchmarkResponse(BenchmarkMethod.ExternalBulkInsert, rowsCount,
+            stopwatch.ElapsedMilliseconds.ToString());
+    }
+
+    public BulkBenchmarkResponse BulkInsertExternal(int rowsCount, bool ignoreReset = false)
+    {
+        ResetDb(ignoreReset);
+        var users = new List<UserEntity>();
+
+        for (int i = 0; i < rowsCount; i++)
+        {
+            users.Add(new UserEntity());
+        }
+
+        var stopwatch = Stopwatch.StartNew();
+        dbContext.BulkInsert(users);
+        stopwatch.Stop();
+
+        return new BulkBenchmarkResponse(BenchmarkMethod.ExternalBulkInsert, rowsCount,
+            stopwatch.ElapsedMilliseconds.ToString());
     }
 
     private async Task ResetDbAsync(bool ignore)
