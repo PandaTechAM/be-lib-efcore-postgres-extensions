@@ -9,5 +9,6 @@ public enum BenchmarkMethod
 {
     EFCore,
     Dapper,
-    NpgsqlCopy
+    NpgsqlCopy,
+    ExternalBulkInsert
 }

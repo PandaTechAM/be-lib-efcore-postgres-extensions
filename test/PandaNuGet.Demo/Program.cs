@@ -24,14 +24,17 @@ app.MapGet("/benchmark-sync/{minimumRows:int}", (BulkInsertService service, int 
     var results = new List<BulkBenchmarkResponse>
     {
         service.BulkInsertEfCore(minimumRows),
-        service.BulkInsertNpgsqlCopy(minimumRows),
         service.BulkInsertDapper(minimumRows),
+        service.BulkInsertNpgsqlCopy(minimumRows),
+        service.BulkInsertExternal(minimumRows),
         service.BulkInsertEfCore(minimumRows * 10),
         service.BulkInsertDapper(minimumRows * 10),
         service.BulkInsertNpgsqlCopy(minimumRows * 10),
+        service.BulkInsertExternal(minimumRows * 10),
         service.BulkInsertEfCore(minimumRows * 100),
         service.BulkInsertDapper(minimumRows * 100),
-        service.BulkInsertNpgsqlCopy(minimumRows * 100)
+        service.BulkInsertNpgsqlCopy(minimumRows * 100),
+        service.BulkInsertExternal(minimumRows * 100)
     };
 
     return results;
@@ -44,12 +47,15 @@ app.MapGet("/benchmark-async/{minimumRows:int}", async (BulkInsertService servic
         await service.BulkInsertEfCoreAsync(minimumRows),
         await service.BulkInsertDapperAsync(minimumRows),
         await service.BulkInsertNpgsqlCopyAsync(minimumRows),
+        await service.BulkInsertExternalAsync(minimumRows),
         await service.BulkInsertEfCoreAsync(minimumRows * 10),
         await service.BulkInsertDapperAsync(minimumRows * 10),
         await service.BulkInsertNpgsqlCopyAsync(minimumRows * 10),
+        await service.BulkInsertExternalAsync(minimumRows * 10),
         await service.BulkInsertEfCoreAsync(minimumRows * 100),
         await service.BulkInsertDapperAsync(minimumRows * 100),
-        await service.BulkInsertNpgsqlCopyAsync(minimumRows * 100)
+        await service.BulkInsertNpgsqlCopyAsync(minimumRows * 100),
+        await service.BulkInsertExternalAsync(minimumRows * 100)
     };
 
     return results;
