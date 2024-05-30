@@ -11,6 +11,8 @@
         <PackageReference Include="Dapper" Version="2.1.35" />
         <PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="8.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
+        <PackageReference Include="Pandatech.Crypto" Version="2.3.2" />
+        <PackageReference Include="Pandatech.EFCoreQueryMagic" Version="1.1.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 

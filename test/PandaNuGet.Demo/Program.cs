@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddPostgresContext();
 builder.Services.AddScoped<BulkInsertService>();
+builder.Services.AddScoped<GetByFirstBytesService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -18,6 +19,18 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapGet("ping", () => "pong");
+
+app.MapGet("/get-user-new", async (GetByFirstBytesService service) =>
+{
+    await service.GetByFirstBytes();
+    return "OK";
+});
+
+app.MapGet("/get-user-old", async (GetByFirstBytesService service) =>
+{
+    await service.GetByFirstBytesDavit();
+    return "OK";
+});
 
 app.MapGet("/benchmark-sync/{minimumRows:int}", (BulkInsertService service, int minimumRows) =>
 {
