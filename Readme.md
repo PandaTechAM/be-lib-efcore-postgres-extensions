@@ -1,33 +1,24 @@
-- [1. Pandatech.EFCore.PostgresExtensions](#1-pandatechefcorepostgresextensions)
-    - [1.1. Features](#11-features)
-    - [1.2. Installation](#12-installation)
-    - [1.3. Usage](#13-usage)
-        - [1.3.1. Row-Level Locking](#131-row-level-locking)
-        - [1.3.2. Npgsql COPY Integration](#132-npgsql-copy-integration)
-            - [1.3.2.1. Benchmarks](#1321-benchmarks)
-                - [1.3.2.1.1. General Benchmark Results](#13211-general-benchmark-results)
-                - [1.3.2.1.2. Detailed Benchmark Results](#13212-detailed-benchmark-results)
-                - [1.3.2.1.3. Efficiency Comparison](#13213-efficiency-comparison)
-                - [1.3.2.1.4. Additional Notes](#13214-additional-notes)
-    - [1.4. License](#14-license)
-
-# 1. Pandatech.EFCore.PostgresExtensions
+# Pandatech.EFCore.PostgresExtensions
 
 Pandatech.EFCore.PostgresExtensions is an advanced NuGet package designed to enhance PostgreSQL functionalities within
 Entity Framework Core, leveraging specific features not covered by the official Npgsql.EntityFrameworkCore.PostgreSQL
-package. This package introduces optimized row-level locking mechanisms and an efficient, typed version of the
-PostgreSQL COPY operation, adhering to EF Core syntax for seamless integration into your projects.
+package. This package introduces optimized row-level locking mechanisms and PostgreSQL sequence random incrementing
+features.
 
-## 1.1. Features
+## Features
 
 1. **Row-Level Locking**: Implements the PostgreSQL `FOR UPDATE` feature, providing three lock
    behaviors - `Wait`, `Skip`, and
    `NoWait`, to facilitate advanced transaction control and concurrency management.
-2. **Npgsql COPY Integration**: Offers a high-performance, typed interface for the PostgreSQL COPY command, allowing for
+2. **Npgsql COPY Integration (Obsolete)**: Offers a high-performance, typed interface for the PostgreSQL COPY command,
+   allowing for
    bulk data operations within the EF Core framework. This feature significantly enhances data insertion speeds and
    efficiency.
+3. **Random Incrementing Sequence Generation:** Provides a secure way to generate sequential IDs with random increments
+   to prevent predictability and potential data exposure. This ensures IDs are non-sequential and non-predictable,
+   enhancing security and balancing database load.
 
-## 1.2. Installation
+## Installation
 
 To install Pandatech.EFCore.PostgresExtensions, use the following NuGet command:
 
@@ -35,9 +26,9 @@ To install Pandatech.EFCore.PostgresExtensions, use the following NuGet command:
 Install-Package Pandatech.EFCore.PostgresExtensions
 ```
 
-## 1.3. Usage
+## Usage
 
-### 1.3.1. Row-Level Locking
+### Row-Level Locking
 
 Configure your DbContext to use Npgsql and enable query locks:
 
@@ -71,7 +62,66 @@ catch (Exception ex)
 }
 ```
 
-### 1.3.2. Npgsql COPY Integration
+### Random Incrementing Sequence Generation
+
+To configure a model to use the random ID sequence, use the `HasRandomIdSequence` extension method in your entity
+configuration:
+
+```csharp
+public class Animal
+{
+    public long Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class AnimalEntityConfiguration : IEntityTypeConfiguration<Animal>
+{
+    public void Configure(EntityTypeBuilder<Animal> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+               .HasRandomIdSequence();
+    }
+}
+```
+
+After creating a migration, add the custom function **above create table** script in your migration class:
+
+```csharp
+public partial class PgFunction : Migration
+{
+    /// <inheritdoc />
+    protected override void Up(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.CreateRandomIdSequence("animal", "id", 5, 5, 10); //Add this line manually
+        
+        migrationBuilder.CreateTable(
+            name: "animal",
+            columns: table => new
+            {
+                id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "animal_random_id_generator()"),
+                name = table.Column<string>(type: "text", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("pk_animal", x => x.id);
+            });
+    }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropTable(
+            name: "animal");
+    }
+}
+```
+#### Additional notes
+- The random incrementing sequence feature ensures the generated IDs are unique, non-sequential, and non-predictable, enhancing security.
+- The feature supports only `long` data type (`bigint` in PostgreSQL).
+
+
+### Npgsql COPY Integration (Obsolete: Use EFCore.BulkExtensions.PostgreSql instead)
 
 For bulk data operations, use the `BulkInsert` or `BulkInsertAsync` extension methods:
 
@@ -89,12 +139,12 @@ public async Task BulkInsertExampleAsync()
 }
 ```
 
-#### 1.3.2.1. Benchmarks
+#### Benchmarks
 
 The integration of the Npgsql COPY command showcases significant performance improvements compared to traditional EF
 Core and Dapper methods:
 
-##### 1.3.2.1.1. General Benchmark Results
+##### General Benchmark Results
 
 | Caption    | Big O Notation | 1M Rows     | Batch Size |
 |------------|----------------|-------------|------------|
@@ -102,7 +152,7 @@ Core and Dapper methods:
 | Dapper     | O(n)           | 20.000 r/s  | 1500       |
 | EFCore     | O(n)           | 10.600 r/s  | 1500       |
 
-##### 1.3.2.1.2. Detailed Benchmark Results
+##### Detailed Benchmark Results
 
 | Operation   | BulkInsert | Dapper | EF Core |
 |-------------|------------|--------|---------|
@@ -110,7 +160,7 @@ Core and Dapper methods:
 | Insert 100K | 405ms      | 5.47s  | 8.58s   |
 | Insert 1M   | 2.87s      | 55.85s | 94.57s  |
 
-##### 1.3.2.1.3. Efficiency Comparison
+##### Efficiency Comparison
 
 | RowsCount | BulkInsert Efficiency      | Dapper Efficiency         |
 |-----------|----------------------------|---------------------------|
@@ -118,13 +168,13 @@ Core and Dapper methods:
 | 100K      | 21.17x faster than EF Core | 1.57x faster than EF Core |
 | 1M        | 32.95x faster than EF Core | 1.69x faster than EF Core |
 
-##### 1.3.2.1.4. Additional Notes
+##### Additional Notes
 
 - The `BulkInsert` feature currently does not support entity properties intended for `JSON` storage.
 
 - The performance metrics provided above are based on benchmarks conducted under controlled conditions. Real-world
   performance may vary based on specific use cases and configurations.
 
-## 1.4. License
+## License
 
 Pandatech.EFCore.PostgresExtensions is licensed under the MIT License.
