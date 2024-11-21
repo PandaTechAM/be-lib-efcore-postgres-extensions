@@ -116,10 +116,12 @@ public partial class PgFunction : Migration
     }
 }
 ```
-#### Additional notes
-- The random incrementing sequence feature ensures the generated IDs are unique, non-sequential, and non-predictable, enhancing security.
-- The feature supports only `long` data type (`bigint` in PostgreSQL).
 
+#### Additional notes
+
+- The random incrementing sequence feature ensures the generated IDs are unique, non-sequential, and non-predictable,
+  enhancing security.
+- The feature supports only `long` data type (`bigint` in PostgreSQL).
 
 ### Npgsql COPY Integration (Obsolete: Use EFCore.BulkExtensions.PostgreSql instead)
 

@@ -119,13 +119,19 @@ public static class BulkInsertExtension
          if (!propertyTypes[i].IsGenericType || propertyTypes[i]
                 .GetGenericTypeDefinition() != typeof(List<>) ||
              !propertyTypes[i]
-              .GetGenericArguments()[0].IsEnum) continue;
+              .GetGenericArguments()[0].IsEnum)
+         {
+            continue;
+         }
 
          var enumMapping = properties[i]
             .FindTypeMapping();
 
          // Only proceed if the mapping is for an array type, as expected for lists
-         if (enumMapping is not NpgsqlArrayTypeMapping) continue;
+         if (enumMapping is not NpgsqlArrayTypeMapping)
+         {
+            continue;
+         }
 
          var list = (IList)values[i]!;
          var underlyingType = Enum.GetUnderlyingType(propertyTypes[i]
@@ -153,9 +159,14 @@ public static class BulkInsertExtension
 
 
       if (entities == null || entities.Count == 0)
+      {
          throw new ArgumentException("The model list cannot be null or empty.");
+      }
 
-      if (context == null) throw new ArgumentNullException(nameof(context), "The DbContext instance cannot be null.");
+      if (context == null)
+      {
+         throw new ArgumentNullException(nameof(context), "The DbContext instance cannot be null.");
+      }
 
 
       var entityType = context.Model.FindEntityType(typeof(T))! ??
@@ -168,14 +179,18 @@ public static class BulkInsertExtension
                              .ToList();
 
       if (pkGeneratedByDb)
+      {
          properties = properties.Where(x => !x.IsKey())
                                 .ToList();
+      }
 
       var columnNames = properties.Select(x => $"\"{x.GetColumnName()}\"")
                                   .ToList();
 
       if (columnNames.Count == 0)
+      {
          throw new InvalidOperationException("Column names are null or empty.");
+      }
 
 
       columnCount = columnNames.Count;
