@@ -1,15 +1,14 @@
 ﻿using EFCore.PostgresExtensions.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
-namespace EFCore.PostgresExtensions.Extensions
-{
-    public static class OptionsBuilderExtensions
-    {
-        public static DbContextOptionsBuilder UseQueryLocks(this DbContextOptionsBuilder builder)
-        {
-            builder.AddInterceptors(new TaggedQueryCommandInterceptor());
+namespace EFCore.PostgresExtensions.Extensions;
 
-            return builder;
-        }
-    }
+public static class OptionsBuilderExtensions
+{
+   public static DbContextOptionsBuilder UseQueryLocks(this DbContextOptionsBuilder builder)
+   {
+      builder.AddInterceptors(new TaggedQueryCommandInterceptor());
+
+      return builder;
+   }
 }
