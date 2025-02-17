@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dapper" Version="2.1.35" />
-        <PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="8.1.2" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-        <PackageReference Include="Pandatech.Crypto" Version="4.0.0" />
+        <PackageReference Include="Dapper" Version="2.1.66" />
+        <PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+        <PackageReference Include="Pandatech.Crypto" Version="4.1.2" />
         <PackageReference Include="Pandatech.EFCoreQueryMagic" Version="1.1.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     </ItemGroup>
 
     <ItemGroup>
