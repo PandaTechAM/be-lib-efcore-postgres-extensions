@@ -8,7 +8,7 @@
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Authors>Pandatech</Authors>
         <Copyright>MIT</Copyright>
-        <Version>4.0.1</Version>
+        <Version>4.0.2</Version>
         <PackageId>Pandatech.EFCore.PostgresExtensions</PackageId>
         <Title>Pandatech.EFCore.PostgresExtensions</Title>
         <PackageTags>Pandatech, library, EntityFrameworkCore, PostgreSQL, For Update, Lock, LockingSyntax, Bulk insert, BinaryCopy</PackageTags>
@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     </ItemGroup>
 
 </Project>
