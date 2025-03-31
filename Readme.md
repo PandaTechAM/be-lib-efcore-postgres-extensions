@@ -10,13 +10,11 @@ features.
 1. **Row-Level Locking**: Implements the PostgreSQL `FOR UPDATE` feature, providing three lock
    behaviors - `Wait`, `Skip`, and
    `NoWait`, to facilitate advanced transaction control and concurrency management.
-2. **Npgsql COPY Integration (Obsolete)**: Offers a high-performance, typed interface for the PostgreSQL COPY command,
-   allowing for
-   bulk data operations within the EF Core framework. This feature significantly enhances data insertion speeds and
-   efficiency.
-3. **Random Incrementing Sequence Generation:** Provides a secure way to generate sequential IDs with random increments
+2. **Random Incrementing Sequence Generation:** Provides a secure way to generate sequential IDs with random increments
    to prevent predictability and potential data exposure. This ensures IDs are non-sequential and non-predictable,
    enhancing security and balancing database load.
+3. **Natural Sorting**: Provides way to calculate natural sort compliant order for string, which can be used
+   in `ORDER BY` clause. This is useful for sorting strings that contain numbers in a human-friendly way.
 
 ## Installation
 
@@ -123,59 +121,40 @@ public partial class PgFunction : Migration
   enhancing security.
 - The feature supports only `long` data type (`bigint` in PostgreSQL).
 
-### Npgsql COPY Integration (Obsolete: Use EFCore.BulkExtensions.PostgreSql instead)
+### Natural Sort Key
 
-For bulk data operations, use the `BulkInsert` or `BulkInsertAsync` extension methods:
+This package can generate a natural sort key for your text columns—especially useful when sorting addresses or other
+fields that contain embedded numbers. It avoids plain lexicographic ordering (e.g. `"10"` < `"2"`) by treating numeric
+substrings numerically.
 
-```csharp
-public async Task BulkInsertExampleAsync()
-{
-    var users = new List<UserEntity>();
-    for (int i = 0; i < 10000; i++)
+#### How to Use
+
+1. Create the function in your migration (once per database). Call the helper method in `Up()`:
+    ```csharp
+       public partial class AddNaturalSortKeyToBuildings : Migration
     {
-        users.Add(new UserEntity { /* Initialization */ });
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+        // Create the natural sort key function in PostgreSQL
+        migrationBuilder.CreateNaturalSortKeyFunction();   
+           
+        }
     }
-
-    await dbContext.Users.BulkInsertAsync(users); // Or use BulkInsert for synchronous operation
-    // It also saves changes to the database
-}
-```
-
-#### Benchmarks
-
-The integration of the Npgsql COPY command showcases significant performance improvements compared to traditional EF
-Core and Dapper methods:
-
-##### General Benchmark Results
-
-| Caption    | Big O Notation | 1M Rows     | Batch Size |
-|------------|----------------|-------------|------------|
-| BulkInsert | O(log n)       | 350.000 r/s | No batch   |
-| Dapper     | O(n)           | 20.000 r/s  | 1500       |
-| EFCore     | O(n)           | 10.600 r/s  | 1500       |
-
-##### Detailed Benchmark Results
-
-| Operation   | BulkInsert | Dapper | EF Core |
-|-------------|------------|--------|---------|
-| Insert 10K  | 76ms       | 535ms  | 884ms   |
-| Insert 100K | 405ms      | 5.47s  | 8.58s   |
-| Insert 1M   | 2.87s      | 55.85s | 94.57s  |
-
-##### Efficiency Comparison
-
-| RowsCount | BulkInsert Efficiency      | Dapper Efficiency         |
-|-----------|----------------------------|---------------------------|
-| 10K       | 11.63x faster than EF Core | 1.65x faster than EF Core |
-| 100K      | 21.17x faster than EF Core | 1.57x faster than EF Core |
-| 1M        | 32.95x faster than EF Core | 1.69x faster than EF Core |
-
-##### Additional Notes
-
-- The `BulkInsert` feature currently does not support entity properties intended for `JSON` storage.
-
-- The performance metrics provided above are based on benchmarks conducted under controlled conditions. Real-world
-  performance may vary based on specific use cases and configurations.
+    ```
+2. Configure your entity to use the natural sort key. In your `IEntityTypeConfiguration` for the table:
+    ```csharp
+    public class BuildingConfiguration : IEntityTypeConfiguration<Building>
+    {
+        public void Configure(EntityTypeBuilder<Building> builder)
+        {
+            // Create a computed column in EF (like "address_natural_sort_key")
+            builder
+                .Property(x => x.AddressNaturalSortKey)
+                .HasNaturalSortKey("address"); // Points to the column storing your original address
+        }
+    }    
+    ```
+When you query the entity, simply `ORDER BY AddressNaturalSortKey` to get true “natural” ordering in PostgreSQL.
 
 ## License
 

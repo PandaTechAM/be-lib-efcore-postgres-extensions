@@ -1,15 +1,15 @@
 ﻿namespace EFCore.PostgresExtensions.Helpers;
 
-public static class PgFunctionHelpers
+internal static class PgFunctionHelpers
 {
-   public static string GetPgFunction(string tableName,
+   public static string GetRandomIdFunctionSql(string tableName,
       string pkName,
       long startValue,
       int minRandIncrementValue,
       int maxRandIncrementValue)
    {
       var sequenceName = GetSequenceName(tableName, pkName);
-      var pgFunctionName = GetPgFunctionName(tableName);
+      var pgFunctionName = GetRandomIdFunctionName(tableName);
 
       return $"""
                   -- Create sequence if not exists
@@ -58,8 +58,36 @@ public static class PgFunctionHelpers
       return $"{tableName}_{pkName}_seq";
    }
 
-   public static string GetPgFunctionName(string tableName)
+   public static string GetRandomIdFunctionName(string tableName)
    {
       return $"{tableName}_random_id_generator()";
+   }
+
+   public static string GetNaturalSortKeyFunction()
+   {
+      return """
+             CREATE OR REPLACE FUNCTION get_natural_sort_key(input_text TEXT)
+             RETURNS TEXT
+             LANGUAGE sql
+             IMMUTABLE
+             AS $$
+               WITH tokens AS (
+                 -- This splits the string into digit blocks (\d+) or non-digit blocks (\D+).
+                 SELECT regexp_matches(input_text, '(\d+|\D+)', 'g') AS parts
+               ),
+               padded AS (
+                 SELECT (
+                   CASE
+                     WHEN parts[1] ~ '^\d+$'
+                     THEN LPAD(parts[1], 10, '0')  -- Zero-pad numeric tokens to length 10
+                     ELSE parts[1]                -- Leave everything else as-is
+                   END
+                 ) AS chunk
+                 FROM tokens
+               )
+               SELECT string_agg(chunk, '')
+               FROM padded;
+             $$;
+             """;
    }
 }
