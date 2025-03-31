@@ -12,10 +12,15 @@ public static class MigrationBuilderExtensions
       int minRandIncrementValue,
       int maxRandIncrementValue)
    {
-      migrationBuilder.Sql(PgFunctionHelpers.GetPgFunction(tableName,
+      migrationBuilder.Sql(PgFunctionHelpers.GetRandomIdFunctionSql(tableName,
          pkName,
          startValue,
          minRandIncrementValue,
          maxRandIncrementValue));
+   }
+
+   public static void CreateNaturalSortKeyFunction(this MigrationBuilder migrationBuilder)
+   {
+      migrationBuilder.Sql(PgFunctionHelpers.GetNaturalSortKeyFunction());
    }
 }
