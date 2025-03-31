@@ -8,13 +8,13 @@
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Authors>Pandatech</Authors>
         <Copyright>MIT</Copyright>
-        <Version>5.0.0</Version>
+        <Version>5.1.0</Version>
         <PackageId>Pandatech.EFCore.PostgresExtensions</PackageId>
         <Title>Pandatech.EFCore.PostgresExtensions</Title>
         <PackageTags>Pandatech, library, EntityFrameworkCore, PostgreSQL, For Update, Lock, LockingSyntax, Bulk insert, BinaryCopy</PackageTags>
         <Description>The Pandatech.EFCore.PostgresExtensions library enriches Entity Framework Core applications with advanced PostgreSQL functionalities, starting with the ForUpdate locking syntax and BulkInsert function. Designed for seamless integration, this NuGet package aims to enhance the efficiency and capabilities of EF Core models when working with PostgreSQL, with the potential for further PostgreSQL-specific extensions.</Description>
         <RepositoryUrl>https://github.com/PandaTechAM/be-lib-efcore-postgres-extensions</RepositoryUrl>
-        <PackageReleaseNotes>Removed bulk copy totally. Added Natural Sort functionality</PackageReleaseNotes>
+        <PackageReleaseNotes>Added support to generate unique index on encrypted columns</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
