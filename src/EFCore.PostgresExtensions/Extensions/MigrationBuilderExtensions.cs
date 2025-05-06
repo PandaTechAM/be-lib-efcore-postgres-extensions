@@ -40,6 +40,52 @@ public static class MigrationBuilderExtensions
 
       return migrationBuilder;
    }
+   
+   /// <summary>
+   /// Removes the random‑ID generator function *and* its backing sequence.
+   /// </summary>
+   public static void DropRandomIdSequence(this MigrationBuilder migrationBuilder,
+      string tableName,
+      string pkName)
+   {
+      var sequenceName = $"{tableName}_{pkName}_seq";
+      var functionName = $"{tableName}_random_id_generator";
+
+      var sql = $"""
+                 DO $$
+                 BEGIN
+                     -- drop function if it exists
+                     IF EXISTS (
+                         SELECT 1
+                         FROM pg_proc
+                         WHERE proname = '{functionName}'
+                     ) THEN
+                         DROP FUNCTION IF EXISTS {functionName}();
+                     END IF;
+
+                     -- drop sequence if it exists
+                     IF EXISTS (
+                         SELECT 1
+                         FROM pg_class
+                         WHERE relkind = 'S'
+                           AND relname = '{sequenceName}'
+                     ) THEN
+                         DROP SEQUENCE IF EXISTS {sequenceName};
+                     END IF;
+                 END
+                 $$;
+                 """;
+
+      migrationBuilder.Sql(sql);
+   }
+
+   /// <summary>
+   /// Removes the natural‑sort‑key function.
+   /// </summary>
+   public static void DropNaturalSortKeyFunction(this MigrationBuilder migrationBuilder)
+   {
+      migrationBuilder.Sql("DROP FUNCTION IF EXISTS get_natural_sort_key(TEXT);");
+   }
 
    public static MigrationBuilder CreateUniqueIndexOnEncryptedColumn(this MigrationBuilder migrationBuilder,
       string tableName,

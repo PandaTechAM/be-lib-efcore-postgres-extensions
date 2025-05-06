@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using PandaNuGet.Demo.Context;
 using PandaNuGet.Demo.Entities;
 using Pandatech.Crypto;
-using Pandatech.Crypto.Helpers;
 using PostgresDbContext = PandaNuGet.Demo.Context.PostgresDbContext;
 
 namespace PandaNuGet.Demo.Services;
@@ -81,12 +80,11 @@ public static class QueryableExtensions
 
       // MethodInfo for the substr method
       var methodInfo = typeof(PostgresDbContext).GetMethod(nameof(PostgresDbContext.substr),
-         new[]
-         {
-            typeof(byte[]),
+      [
+         typeof(byte[]),
             typeof(int),
             typeof(int)
-         });
+      ]);
 
       // Call to substr method
       var call = Expression.Call(

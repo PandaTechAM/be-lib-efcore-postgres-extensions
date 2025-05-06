@@ -15,6 +15,8 @@ features.
    enhancing security and balancing database load.
 3. **Natural Sorting**: Provides way to calculate natural sort compliant order for string, which can be used
    in `ORDER BY` clause. This is useful for sorting strings that contain numbers in a human-friendly way.
+4. **Schema Rollback Helpers**: Extension methods `DropRandomIdSequence` and `DropNaturalSortKeyFunction` simplify
+   cleanup in `Down` migrations.
 
 ## Installation
 
@@ -109,6 +111,8 @@ public partial class PgFunction : Migration
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
+        migrationBuilder.DropRandomIdSequence("animal", "id");
+         
         migrationBuilder.DropTable(
             name: "animal");
     }
@@ -138,6 +142,10 @@ substrings numerically.
         // Create the natural sort key function in PostgreSQL
         migrationBuilder.CreateNaturalSortKeyFunction();   
            
+        protected override void Down(MigrationBuilder migrationBuilder)
+           {
+               migrationBuilder.DropNaturalSortKeyFunction();        
+           }
         }
     }
     ```
@@ -154,6 +162,7 @@ substrings numerically.
         }
     }    
     ```
+
 When you query the entity, simply `ORDER BY AddressNaturalSortKey` to get true “natural” ordering in PostgreSQL.
 
 ## License
