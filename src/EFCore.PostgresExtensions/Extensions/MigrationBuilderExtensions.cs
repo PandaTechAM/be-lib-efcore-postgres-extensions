@@ -40,9 +40,9 @@ public static class MigrationBuilderExtensions
 
       return migrationBuilder;
    }
-   
+
    /// <summary>
-   /// Removes the random‑ID generator function *and* its backing sequence.
+   ///    Removes the random‑ID generator function *and* its backing sequence.
    /// </summary>
    public static void DropRandomIdSequence(this MigrationBuilder migrationBuilder,
       string tableName,
@@ -80,7 +80,7 @@ public static class MigrationBuilderExtensions
    }
 
    /// <summary>
-   /// Removes the natural‑sort‑key function.
+   ///    Removes the natural‑sort‑key function.
    /// </summary>
    public static void DropNaturalSortKeyFunction(this MigrationBuilder migrationBuilder)
    {

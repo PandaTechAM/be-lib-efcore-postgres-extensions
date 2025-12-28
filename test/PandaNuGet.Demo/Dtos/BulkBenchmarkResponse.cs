@@ -7,8 +7,8 @@ public record BulkBenchmarkResponse(BenchmarkMethod Method, int RowsCount, strin
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum BenchmarkMethod
 {
-    EFCore,
-    Dapper,
-    NpgsqlCopy,
-    ExternalBulkInsert
+   EFCore,
+   Dapper,
+   NpgsqlCopy,
+   ExternalBulkInsert
 }

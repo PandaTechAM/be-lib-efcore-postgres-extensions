@@ -16,8 +16,9 @@ public static class EntityTypeConfigurationExtensions
 
       return propertyBuilder;
    }
-   
-   public static PropertyBuilder<TProperty> HasNaturalSortKey<TProperty>(this PropertyBuilder<TProperty> propertyBuilder,
+
+   public static PropertyBuilder<TProperty> HasNaturalSortKey<TProperty>(
+      this PropertyBuilder<TProperty> propertyBuilder,
       string originalPropName)
    {
       propertyBuilder.HasComputedColumnSql($"get_natural_sort_key({originalPropName})::text", true);
