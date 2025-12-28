@@ -1,0 +1,16 @@
+<Solution>
+    <Folder Name="/Solution Items/">
+        <File Path=".editorconfig"/>
+        <File Path=".github/workflows/main.yml"/>
+        <File Path=".gitignore"/>
+        <File Path="global.json"/>
+        <File Path="Readme.md"/>
+    </Folder>
+    <Folder Name="/src/">
+        <Project Path="src/EFCore.PostgresExtensions/EFCore.PostgresExtensions.csproj"/>
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/PandaNuGet.Demo/PandaNuGet.Demo.csproj"/>
+        <Project Path="test/PandaNuGet.Tests/PandaNuGet.Tests.csproj"/>
+    </Folder>
+</Solution>

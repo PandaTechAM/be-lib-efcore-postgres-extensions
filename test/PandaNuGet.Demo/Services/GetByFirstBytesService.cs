@@ -82,8 +82,8 @@ public static class QueryableExtensions
       var methodInfo = typeof(PostgresDbContext).GetMethod(nameof(PostgresDbContext.substr),
       [
          typeof(byte[]),
-            typeof(int),
-            typeof(int)
+         typeof(int),
+         typeof(int)
       ]);
 
       // Call to substr method

@@ -20,7 +20,7 @@ internal static class PgFunctionHelpers
                   END IF;
               END
               $$;
-              
+
                   -- Create or replace the function
                   CREATE OR REPLACE FUNCTION {pgFunctionName}
                   RETURNS bigint AS $$
@@ -31,7 +31,7 @@ internal static class PgFunctionHelpers
                   BEGIN
                       -- Acquire an advisory lock
                       PERFORM pg_advisory_lock(1);
-              
+
                       -- Get the next value of the sequence atomically
                       current_value := nextval('{sequenceName}'); -- name of the sequence
                       
@@ -46,7 +46,7 @@ internal static class PgFunctionHelpers
                       
                       -- Release the advisory lock
                       PERFORM pg_advisory_unlock(1);
-              
+
                       RETURN new_value;
                   END;
                   $$ LANGUAGE plpgsql;
