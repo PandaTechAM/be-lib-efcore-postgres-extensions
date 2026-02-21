@@ -8,13 +8,13 @@
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Authors>Pandatech</Authors>
         <Copyright>MIT</Copyright>
-        <Version>6.1.0</Version>
+        <Version>6.2.0</Version>
         <PackageId>Pandatech.EFCore.PostgresExtensions</PackageId>
         <Title>Pandatech.EFCore.PostgresExtensions</Title>
         <PackageTags>Pandatech, library, EntityFrameworkCore, PostgreSQL, For Update, Lock, LockingSyntax, Bulk insert, BinaryCopy</PackageTags>
         <Description>The Pandatech.EFCore.PostgresExtensions library enriches Entity Framework Core applications with advanced PostgreSQL functionalities, starting with the ForUpdate locking syntax and BulkInsert function. Designed for seamless integration, this NuGet package aims to enhance the efficiency and capabilities of EF Core models when working with PostgreSQL, with the potential for further PostgreSQL-specific extensions.</Description>
         <RepositoryUrl>https://github.com/PandaTechAM/be-lib-efcore-postgres-extensions</RepositoryUrl>
-        <PackageReleaseNotes>nuget updates</PackageReleaseNotes>
+        <PackageReleaseNotes>Analyzers fix</PackageReleaseNotes>
 
         <!-- Never run analyzers as part of compilation (local, CI, dotnet build/test/publish) -->
         <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
@@ -32,8 +32,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-        <PackageReference Include="Pandatech.Analyzers" Version="2.1.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0"/>
+        <PackageReference Include="Pandatech.Analyzers" Version="2.1.0">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.18.0.131500">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
