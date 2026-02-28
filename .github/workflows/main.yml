@@ -1,33 +1,67 @@
-name: Deploy NuGet Package
+name: Publish EFCore.PostgresExtensions To NuGet
 
 env:
-  PROJECT_PATH: './src/EFCore.PostgresExtensions/EFCore.PostgresExtensions.csproj'
-  OUTPUT_DIR: 'nupkgs'
-  NUGET_SOURCE: 'https://api.nuget.org/v3/index.json'
-  NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+  NUGET_SOURCE: https://api.nuget.org/v3/index.json
+  OUTPUT_DIR: nupkgs
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+
+permissions:
+  contents: read
+
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
+    environment: Environment Settings
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup .NET Core
+      - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
+      - name: Restore
+        run: dotnet restore
+
       - name: Build
-        run: dotnet build ${{ env.PROJECT_PATH }}
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
 
       - name: Pack
-        run: dotnet pack ${{ env.PROJECT_PATH }} --output ${{ env.OUTPUT_DIR }}
+        run: dotnet pack src/EFCore.PostgresExtensions/EFCore.PostgresExtensions.csproj --no-build --configuration Release --output ${{ env.OUTPUT_DIR }}
 
-      - name: Publish
-        run: dotnet nuget push ${{ env.OUTPUT_DIR }}/*.nupkg -k ${{ env.NUGET_API_KEY }} -s ${{ env.NUGET_SOURCE }}
+      - name: Publish packages
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${NUGET_API_KEY:-}" ]; then
+            echo "NUGET_API_KEY is missing. If you stored it as an Environment secret, set jobs.publish.environment to that Environment name."
+            exit 1
+          fi
+
+          shopt -s nullglob
+
+          nupkgs=( "${{ env.OUTPUT_DIR }}"/*.nupkg )
+          snupkgs=( "${{ env.OUTPUT_DIR }}"/*.snupkg )
+
+          if [ ${#nupkgs[@]} -eq 0 ]; then
+            echo "No .nupkg files found in ${{ env.OUTPUT_DIR }}"
+            ls -la "${{ env.OUTPUT_DIR }}" || true
+            exit 1
+          fi
+
+          dotnet nuget push "${nupkgs[@]}" --api-key "$NUGET_API_KEY" --source "${{ env.NUGET_SOURCE }}" --skip-duplicate
+
+          if [ ${#snupkgs[@]} -gt 0 ]; then
+            dotnet nuget push "${snupkgs[@]}" --api-key "$NUGET_API_KEY" --source "${{ env.NUGET_SOURCE }}" --skip-duplicate
+          fi

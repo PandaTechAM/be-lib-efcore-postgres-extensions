@@ -1,71 +1,70 @@
 # Pandatech.EFCore.PostgresExtensions
 
-Pandatech.EFCore.PostgresExtensions is an advanced NuGet package designed to enhance PostgreSQL functionalities within
-Entity Framework Core, leveraging specific features not covered by the official Npgsql.EntityFrameworkCore.PostgreSQL
-package. This package introduces optimized row-level locking mechanisms and PostgreSQL sequence random incrementing
-features.
+PostgreSQL-specific extensions for Entity Framework Core that fill the gaps left by the official Npgsql provider.
 
-## Features
+| Feature                     | What it does                                                   |
+|-----------------------------|----------------------------------------------------------------|
+| **Row-level locking**       | `FOR UPDATE` with `Wait`, `SkipLocked`, and `NoWait` behaviors |
+| **Random-increment IDs**    | Non-predictable sequential IDs backed by a PostgreSQL sequence |
+| **Natural sort keys**       | Human-friendly ordering for strings containing numbers         |
+| **Schema rollback helpers** | Clean `Down()` migration methods for all of the above          |
 
-1. **Row-Level Locking**: Implements the PostgreSQL `FOR UPDATE` feature, providing three lock
-   behaviors - `Wait`, `Skip`, and
-   `NoWait`, to facilitate advanced transaction control and concurrency management.
-2. **Random Incrementing Sequence Generation:** Provides a secure way to generate sequential IDs with random increments
-   to prevent predictability and potential data exposure. This ensures IDs are non-sequential and non-predictable,
-   enhancing security and balancing database load.
-3. **Natural Sorting**: Provides way to calculate natural sort compliant order for string, which can be used
-   in `ORDER BY` clause. This is useful for sorting strings that contain numbers in a human-friendly way.
-4. **Schema Rollback Helpers**: Extension methods `DropRandomIdSequence` and `DropNaturalSortKeyFunction` simplify
-   cleanup in `Down` migrations.
+Targets **net8.0**, **net9.0**, and **net10.0**.
 
 ## Installation
 
-To install Pandatech.EFCore.PostgresExtensions, use the following NuGet command:
-
 ```bash
-Install-Package Pandatech.EFCore.PostgresExtensions
+dotnet add package Pandatech.EFCore.PostgresExtensions
 ```
 
-## Usage
+## Row-level locking
 
-### Row-Level Locking
+PostgreSQL's `FOR UPDATE` clause lets you lock selected rows for the duration of a transaction. This package exposes it
+as a LINQ extension method with three lock behaviors.
 
-Configure your DbContext to use Npgsql and enable query locks:
+### Setup
+
+Register the query interceptor on your `DbContext`:
 
 ```csharp
-services.AddDbContext<MyDbContext>(options =>
-{
-    options.UseNpgsql(Configuration.GetConnectionString("MyDatabaseConnection"))
-           .UseQueryLocks();
-});
+services.AddDbContextPool<AppDbContext>(options =>
+    options.UseNpgsql(connectionString)
+           .UseQueryLocks());
 ```
 
-Within a transaction scope, apply the desired lock behavior using the `ForUpdate` extension method:
+### Usage
+
+The `ForUpdate` method must be called inside a transaction:
 
 ```csharp
-using var transaction = _dbContext.Database.BeginTransaction();
-try
-{
-    var entityToUpdate = _dbContext.Entities
-        .Where(e => e.Id == id)
-        .ForUpdate(LockBehavior.NoWait) // Or use LockBehavior.Default (Wait)/ LockBehavior.SkipLocked
-        .FirstOrDefault();
+await using var transaction = await dbContext.Database.BeginTransactionAsync();
 
-    // Perform updates on entityToUpdate
-    await _dbContext.SaveChangesAsync();
-    transaction.Commit();
-}
-catch (Exception ex)
-{
-    transaction.Rollback();
-    // Handle exception
-}
+var order = await dbContext.Orders
+    .Where(o => o.Id == orderId)
+    .ForUpdate(LockBehavior.SkipLocked)
+    .FirstOrDefaultAsync();
+
+// Modify the locked row
+order.Status = OrderStatus.Processing;
+await dbContext.SaveChangesAsync();
+await transaction.CommitAsync();
 ```
 
-### Random Incrementing Sequence Generation
+### Lock behaviors
 
-To configure a model to use the random ID sequence, use the `HasRandomIdSequence` extension method in your entity
-configuration:
+| Behavior         | SQL generated            | When to use                                                     |
+|------------------|--------------------------|-----------------------------------------------------------------|
+| `Default` (Wait) | `FOR UPDATE`             | You need the row and can wait for it                            |
+| `SkipLocked`     | `FOR UPDATE SKIP LOCKED` | Queue-style processing — skip rows another worker already holds |
+| `NoWait`         | `FOR UPDATE NOWAIT`      | Fail immediately if the row is locked                           |
+
+## Random-increment sequence IDs
+
+Generates `bigint` IDs that increment by a random amount within a configurable range. The IDs are unique and always
+increasing, but the gaps between them are unpredictable — preventing enumeration attacks while keeping an index-friendly
+insert order.
+
+### 1. Configure the entity
 
 ```csharp
 public class Animal
@@ -74,7 +73,7 @@ public class Animal
     public string Name { get; set; }
 }
 
-public class AnimalEntityConfiguration : IEntityTypeConfiguration<Animal>
+public class AnimalConfiguration : IEntityTypeConfiguration<Animal>
 {
     public void Configure(EntityTypeBuilder<Animal> builder)
     {
@@ -85,86 +84,119 @@ public class AnimalEntityConfiguration : IEntityTypeConfiguration<Animal>
 }
 ```
 
-After creating a migration, add the custom function **above create table** script in your migration class:
+### 2. Create the function in a migration
+
+The function must be created **before** the table that references it. Add it manually at the top of your `Up()` method:
 
 ```csharp
-public partial class PgFunction : Migration
+protected override void Up(MigrationBuilder migrationBuilder)
 {
-    /// <inheritdoc />
-    protected override void Up(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.CreateRandomIdSequence("animal", "id", 5, 5, 10); //Add this line manually
-        
-        migrationBuilder.CreateTable(
-            name: "animal",
-            columns: table => new
-            {
-                id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "animal_random_id_generator()"),
-                name = table.Column<string>(type: "text", nullable: false)
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("pk_animal", x => x.id);
-            });
-    }
+    // Create the sequence + function first
+    migrationBuilder.CreateRandomIdSequence(
+        tableName: "animal",
+        pkName: "id",
+        startValue: 5,
+        minRandIncrementValue: 5,
+        maxRandIncrementValue: 10);
 
-    /// <inheritdoc />
-    protected override void Down(MigrationBuilder migrationBuilder)
+    // Then create the table (the default value references the function)
+    migrationBuilder.CreateTable(...);
+}
+
+protected override void Down(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.DropRandomIdSequence("animal", "id");
+    migrationBuilder.DropTable("animal");
+}
+```
+
+Parameters: `startValue` is the first ID returned, `minRandIncrementValue` and `maxRandIncrementValue` define the random
+gap range between consecutive IDs.
+
+## Natural sort keys
+
+Sorts strings that contain numbers the way a human would expect: `"Item 2"` before `"Item 10"`, not after it. The
+package creates a PostgreSQL function that zero-pads numeric substrings, producing a sortable text key.
+
+### 1. Create the function (once per database)
+
+```csharp
+protected override void Up(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.CreateNaturalSortKeyFunction();
+}
+
+protected override void Down(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.DropNaturalSortKeyFunction();
+}
+```
+
+### 2. Add a computed column
+
+```csharp
+public class Building
+{
+    public long Id { get; set; }
+    public string Address { get; set; }
+    public string AddressNaturalSortKey { get; set; }
+}
+
+public class BuildingConfiguration : IEntityTypeConfiguration<Building>
+{
+    public void Configure(EntityTypeBuilder<Building> builder)
     {
-        migrationBuilder.DropRandomIdSequence("animal", "id");
-         
-        migrationBuilder.DropTable(
-            name: "animal");
+        builder.Property(x => x.AddressNaturalSortKey)
+               .HasNaturalSortKey("address");
     }
 }
 ```
 
-#### Additional notes
+Then order by the computed column:
 
-- The random incrementing sequence feature ensures the generated IDs are unique, non-sequential, and non-predictable,
-  enhancing security.
-- The feature supports only `long` data type (`bigint` in PostgreSQL).
+```csharp
+var sorted = await dbContext.Buildings
+    .OrderBy(b => b.AddressNaturalSortKey)
+    .ToListAsync();
+```
 
-### Natural Sort Key
+## Encrypted-column unique indexes
 
-This package can generate a natural sort key for your text columns—especially useful when sorting addresses or other
-fields that contain embedded numbers. It avoids plain lexicographic ordering (e.g. `"10"` < `"2"`) by treating numeric
-substrings numerically.
+For columns that store encrypted data where only the first 64 characters are deterministic (e.g., hash prefix), you can
+create a unique index on that prefix:
 
-#### How to Use
+```csharp
+// In migration Up()
+migrationBuilder.CreateUniqueIndexOnEncryptedColumn("users", "email_encrypted");
 
-1. Create the function in your migration (once per database). Call the helper method in `Up()`:
-    ```csharp
-       public partial class AddNaturalSortKeyToBuildings : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-        // Create the natural sort key function in PostgreSQL
-        migrationBuilder.CreateNaturalSortKeyFunction();   
-           
-        protected override void Down(MigrationBuilder migrationBuilder)
-           {
-               migrationBuilder.DropNaturalSortKeyFunction();        
-           }
-        }
-    }
-    ```
-2. Configure your entity to use the natural sort key. In your `IEntityTypeConfiguration` for the table:
-    ```csharp
-    public class BuildingConfiguration : IEntityTypeConfiguration<Building>
-    {
-        public void Configure(EntityTypeBuilder<Building> builder)
-        {
-            // Create a computed column in EF (like "address_natural_sort_key")
-            builder
-                .Property(x => x.AddressNaturalSortKey)
-                .HasNaturalSortKey("address"); // Points to the column storing your original address
-        }
-    }    
-    ```
+// With an optional WHERE condition
+migrationBuilder.CreateUniqueIndexOnEncryptedColumn("users", "email_encrypted", "is_active = true");
 
-When you query the entity, simply `ORDER BY AddressNaturalSortKey` to get true “natural” ordering in PostgreSQL.
+// In migration Down()
+migrationBuilder.DropUniqueIndexOnEncryptedColumn("users", "email_encrypted");
+```
+
+## API reference
+
+### Extension methods
+
+| Method                                    | Target                    | Description                                                                         |
+|-------------------------------------------|---------------------------|-------------------------------------------------------------------------------------|
+| `UseQueryLocks()`                         | `DbContextOptionsBuilder` | Registers the interceptor that rewrites tagged queries into `FOR UPDATE` SQL        |
+| `ForUpdate()`                             | `IQueryable<T>`           | Tags a query for row-level locking (must be inside a transaction)                   |
+| `HasRandomIdSequence()`                   | `PropertyBuilder`         | Configures the property to use a random-increment sequence as its default value     |
+| `HasNaturalSortKey(column)`               | `PropertyBuilder`         | Configures the property as a stored computed column using the natural sort function |
+| `CreateRandomIdSequence(...)`             | `MigrationBuilder`        | Creates the PostgreSQL sequence and generator function                              |
+| `DropRandomIdSequence(...)`               | `MigrationBuilder`        | Drops the sequence and generator function                                           |
+| `CreateNaturalSortKeyFunction()`          | `MigrationBuilder`        | Creates the natural sort key function                                               |
+| `DropNaturalSortKeyFunction()`            | `MigrationBuilder`        | Drops the natural sort key function                                                 |
+| `CreateUniqueIndexOnEncryptedColumn(...)` | `MigrationBuilder`        | Creates a unique index on the first 64 chars of a column                            |
+| `DropUniqueIndexOnEncryptedColumn(...)`   | `MigrationBuilder`        | Drops the encrypted-column unique index                                             |
+
+### Enums
+
+`LockBehavior`: `Default` (wait), `SkipLocked`, `NoWait`.
 
 ## License
 
-Pandatech.EFCore.PostgresExtensions is licensed under the MIT License.
+MIT

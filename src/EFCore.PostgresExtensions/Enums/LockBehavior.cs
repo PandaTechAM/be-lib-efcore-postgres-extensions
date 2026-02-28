@@ -18,7 +18,7 @@ public enum LockBehavior
    NoWait = 2
 }
 
-public static class LockBehaviorExtensions
+internal static class LockBehaviorExtensions
 {
    public static string GetSqlKeyword(this LockBehavior lockBehavior)
    {
