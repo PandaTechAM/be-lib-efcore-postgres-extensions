@@ -1,42 +1,66 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
         <Nullable>enable</Nullable>
-        <PackageIcon>pandatech.png</PackageIcon>
-        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <IsPackable>true</IsPackable>
+
         <Authors>Pandatech</Authors>
-        <Copyright>MIT</Copyright>
-        <Version>6.2.0</Version>
-        <PackageId>Pandatech.EFCore.PostgresExtensions</PackageId>
-        <Title>Pandatech.EFCore.PostgresExtensions</Title>
-        <PackageTags>Pandatech, library, EntityFrameworkCore, PostgreSQL, For Update, Lock, LockingSyntax, Bulk insert, BinaryCopy</PackageTags>
-        <Description>The Pandatech.EFCore.PostgresExtensions library enriches Entity Framework Core applications with advanced PostgreSQL functionalities, starting with the ForUpdate locking syntax and BulkInsert function. Designed for seamless integration, this NuGet package aims to enhance the efficiency and capabilities of EF Core models when working with PostgreSQL, with the potential for further PostgreSQL-specific extensions.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/PandaTechAM/be-lib-efcore-postgres-extensions</RepositoryUrl>
-        <PackageReleaseNotes>Analyzers fix</PackageReleaseNotes>
+        <PackageProjectUrl>https://github.com/PandaTechAM/be-lib-efcore-postgres-extensions</PackageProjectUrl>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
-        <!-- Never run analyzers as part of compilation (local, CI, dotnet build/test/publish) -->
+        <PackageIcon>pandatech.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <PackageId>Pandatech.EFCore.PostgresExtensions</PackageId>
+        <Description>PostgreSQL-specific extensions for Entity Framework Core: row-level locking (FOR UPDATE with Wait/SkipLocked/NoWait), random-increment sequence ID generation, natural sort keys, and schema rollback helpers.</Description>
+        <PackageTags>efcore;entity-framework-core;postgresql;postgres;for-update;row-locking;skip-locked;nowait;random-id;sequence;natural-sort;npgsql</PackageTags>
+
+        <Version>7.0.0</Version>
+        <PackageReleaseNotes>Multi-TFM support (net8/9/10), improved documentation</PackageReleaseNotes>
+
+        <!-- Build quality -->
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Source/symbols -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+        <!-- Analyzer behavior -->
         <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-
-        <!-- Keep background/live analysis in the IDE -->
         <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-
-        <!-- Optional: ensure code-style analyzers don't run during build either -->
         <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
     </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\..\pandatech.png" Pack="true" PackagePath="\"/>
-        <None Include="..\..\Readme.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
-    <ItemGroup>
+    <!-- TFM-conditional provider dependency -->
+    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0"/>
-        <PackageReference Include="Pandatech.Analyzers" Version="2.1.0">
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.18.0.131500">
+    </ItemGroup>
+
+    <!-- Analyzers (build-only, not shipped) -->
+    <ItemGroup>
+        <PackageReference Include="Pandatech.Analyzers" Version="[2.1.0]" PrivateAssets="all"/>
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="[10.19.0.132793]">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
