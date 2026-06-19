@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EFCore.PostgresExtensions.Extensions;
 
+/// <summary>
+///    Provides query helpers for PostgreSQL-specific EF Core behavior.
+/// </summary>
 public static class QueryableExtensions
 {
    internal const string ForUpdateKey = "for update ";

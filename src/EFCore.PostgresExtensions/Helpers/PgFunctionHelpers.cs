@@ -1,7 +1,19 @@
 ﻿namespace EFCore.PostgresExtensions.Helpers;
 
+/// <summary>
+///    Provides SQL generation helpers for PostgreSQL functions used by this package.
+/// </summary>
 internal static class PgFunctionHelpers
 {
+   /// <summary>
+   ///    Builds SQL that creates a random-ID sequence and generator function for a table primary key.
+   /// </summary>
+   /// <param name="tableName">The table that owns the generated primary-key values.</param>
+   /// <param name="pkName">The primary-key column name used to derive the sequence name.</param>
+   /// <param name="startValue">The initial sequence value.</param>
+   /// <param name="minRandIncrementValue">The minimum random increment applied after each generated value.</param>
+   /// <param name="maxRandIncrementValue">The maximum random increment applied after each generated value.</param>
+   /// <returns>The SQL script that creates the sequence and generator function.</returns>
    public static string GetRandomIdFunctionSql(string tableName,
       string pkName,
       long startValue,
@@ -58,11 +70,20 @@ internal static class PgFunctionHelpers
       return $"{tableName}_{pkName}_seq";
    }
 
+   /// <summary>
+   ///    Gets the PostgreSQL random-ID generator function name for the specified table.
+   /// </summary>
+   /// <param name="tableName">The table that owns the generator function.</param>
+   /// <returns>The PostgreSQL function invocation name.</returns>
    public static string GetRandomIdFunctionName(string tableName)
    {
       return $"{tableName}_random_id_generator()";
    }
 
+   /// <summary>
+   ///    Builds SQL that creates or replaces the natural sort key function.
+   /// </summary>
+   /// <returns>The SQL script that creates the natural sort key function.</returns>
    public static string GetNaturalSortKeyFunction()
    {
       return """

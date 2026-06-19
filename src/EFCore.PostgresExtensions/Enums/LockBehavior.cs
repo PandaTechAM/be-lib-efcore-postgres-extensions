@@ -1,5 +1,8 @@
 ﻿namespace EFCore.PostgresExtensions.Enums;
 
+/// <summary>
+///    Describes how PostgreSQL should handle locked rows when a query uses FOR UPDATE.
+/// </summary>
 public enum LockBehavior
 {
    /// <summary>
@@ -20,6 +23,11 @@ public enum LockBehavior
 
 internal static class LockBehaviorExtensions
 {
+   /// <summary>
+   ///    Gets the PostgreSQL locking keyword for a lock behavior.
+   /// </summary>
+   /// <param name="lockBehavior">The lock behavior to convert.</param>
+   /// <returns>The PostgreSQL locking keyword, or an empty string for the default behavior.</returns>
    public static string GetSqlKeyword(this LockBehavior lockBehavior)
    {
       return lockBehavior switch

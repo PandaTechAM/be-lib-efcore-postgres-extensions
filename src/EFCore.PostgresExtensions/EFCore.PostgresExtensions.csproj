@@ -21,8 +21,8 @@
         <Description>PostgreSQL-specific extensions for Entity Framework Core: row-level locking (FOR UPDATE with Wait/SkipLocked/NoWait), random-increment sequence ID generation, natural sort keys, and schema rollback helpers.</Description>
         <PackageTags>efcore;entity-framework-core;postgresql;postgres;for-update;row-locking;skip-locked;nowait;random-id;sequence;natural-sort;npgsql</PackageTags>
 
-        <Version>7.0.0</Version>
-        <PackageReleaseNotes>Multi-TFM support (net8/9/10), improved documentation</PackageReleaseNotes>
+        <Version>7.0.1</Version>
+        <PackageReleaseNotes>Public documentation for methods added.</PackageReleaseNotes>
 
         <!-- Build quality -->
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
